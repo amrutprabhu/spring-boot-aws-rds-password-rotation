@@ -1,0 +1,53 @@
+= Spring Boot : Handle AWS RDS password change / rotation without restarting application
+
+This is an implementation in which your spring boot application can handle AWS RDS database password rotation or password change without restarting.
+
+This is using an open source library provided by AWS called https://github.com/aws/aws-secretsmanager-jdbc[AWS Secrets Manager JDBC`]
+
+=== Pre-requisites
+
+RDS instance up and running. For this implementation we will be using a MySQL RDS instance, and the database credentials are stored in
+AWS Secrets Manager. In this case its stored in the secret:  `secret/rotation`
+
+=== Configuration Changes
+
+
+You need to add the library provided by AWS as dependency to the build file
+```
+    <dependency>
+        <groupId>com.amazonaws.secretsmanager</groupId>
+        <artifactId>aws-secretsmanager-jdbc</artifactId>
+        <version>1.0.5</version>
+    </dependency>
+
+```
+
+Next, You will have to make the following 3 changes in the `application.yaml` file
+
+1. Provide the datasource url with the scheme `jdbc-secretsmanager` instead of just `jdbc`.
+
+2. Provide the Database driver class name. In My case it is `com.amazonaws.secretsmanager.sql.AWSSecretsManagerMySQLDriver`.
+You can find drivers for other database inside the library source code https://github.com/aws/aws-secretsmanager-jdbc/tree/master/src/main/java/com/amazonaws/secretsmanager/sql[here]
+
+3. Set the username property to the secret you created for the database credentials. In this case it is `secret/rotation`
+
+So your config should look something like this.
+
+```
+spring:
+  datasource:
+    url: jdbc-secretsmanager:mysql://database-host:3306/rotate_db
+    username: secret/rotation
+    driver-class-name: com.amazonaws.secretsmanager.sql.AWSSecretsManagerMySQLDriver
+
+```
+
+
+Make sure you have access to AWS via the AWS CLI. Then set environment propertie `AWS_PROFILE` to your AWS profile and
+`AWS_REGION` to your default region.
+
+Start your application, and it should be able to pull the secrets from the AWS secrets manager and make teh connection
+with the RDS instance.
+
+== Bonus
+This configuration also works for liquibase integration. ;-)
