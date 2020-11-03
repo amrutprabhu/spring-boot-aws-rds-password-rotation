@@ -1,0 +1,13 @@
+server:
+  shutdown: graceful
+
+spring:
+  datasource:
+    url: jdbc-secretsmanager:mysql://database-host:3306/rotate_db
+    username: secret/rotation
+    driver-class-name: com.amazonaws.secretsmanager.sql.AWSSecretsManagerMySQLDriver
+
+  liquibase:
+    url: jdbc-secretsmanager:mysql://database-host:3306/rotate_db
+    user: secret/rotation
+

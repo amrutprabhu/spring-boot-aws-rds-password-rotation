@@ -1,0 +1,14 @@
+databaseChangeLog:
+  - changeSet:
+      id: first-change
+      author: amrut
+      changes:
+        - createTable:
+            tableName: product
+            columns:
+              - column:
+                  name: id
+                  type: varchar(255)
+              - column:
+                  name: name
+                  type: varchar(255)
